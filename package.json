@@ -1,0 +1,43 @@
+{
+  "name": "ts-reflect",
+  "version": "0.0.0",
+  "license": "MIT",
+  "description": "TypeScript transformation to access type data on runtime.",
+  "author": "Andy Wermke (https://github.com/andywer)",
+  "repository": "github:andywer/ts-reflect",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "tslint --project .",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "reflect",
+    "transform",
+    "typescript"
+  ],
+  "peerDependencies": {
+    "typescript": ">= 2.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^10.11.3",
+    "prettier": "^1.14.3",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
+    "typescript": "^3.1.1"
+  },
+  "files": [
+    "dist/**"
+  ],
+  "prettier": {
+    "semi": false,
+    "printWidth": 100
+  },
+  "lint-staged": {
+    "*": [
+      "prettier --write",
+      "git add"
+    ]
+  }
+}

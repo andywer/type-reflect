@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "lib": [
+      "es2015"
+    ],
+    "newLine": "lf",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "dist/",
+    "strict": true,
+    "target": "es5",
+    "declaration": true
+  },
+  "include": [
+    "src/index.ts",
+    "src/transform.ts",
+    "typings/**/*.d.ts",
+    "node_modules/@*/types-*/*.d.ts"
+  ]
+}
