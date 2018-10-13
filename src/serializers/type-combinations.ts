@@ -1,48 +1,104 @@
 import ts from "typescript"
-import {
-  SerializedCombinedType,
-  SerializedTypeBase,
-  SerializedTypeIdentifier,
-  SerializeTypeFn
-} from "./_types"
+import { IntrinsicType, SerializeTypeFn, TypeSchema, UnionType } from "./_types"
 
-function destructureUnionWithUndefined (unionTypes: ts.Type[], serializeType: SerializeTypeFn): SerializedTypeBase | SerializedCombinedType {
-  if (unionTypes.length === 2 && unionTypes.some(unionType => Boolean(unionType.flags & ts.TypeFlags.Undefined))) {
-    const nonUndefinedTypes = unionTypes.filter(unionType => !Boolean(unionType.flags & ts.TypeFlags.Undefined))
-    return nonUndefinedTypes.length > 0
-      ? {
-        ...serializeType(nonUndefinedTypes[0]),
-        optional: true
-      }
-      : {
-        type: SerializedTypeIdentifier.undefined
-      }
-  } else {
-    return {
-      type: SerializedTypeIdentifier.union,
-      subtypes: unionTypes.map(unionType => serializeType(unionType))
-    }
-  }
+interface ObjectProperties {
+  [propName: string]: TypeSchema
 }
 
-function serializeIntersection (type: ts.Type, serializeSymbol: any, serializeType: SerializeTypeFn): SerializedTypeBase | SerializedCombinedType | null {
+const primitiveTypes = [
+  IntrinsicType.any,
+  IntrinsicType.boolean,
+  IntrinsicType.never,
+  IntrinsicType.null,
+  IntrinsicType.number,
+  IntrinsicType.string,
+  IntrinsicType.undefined
+]
+
+function concat<T> (arrays: T[][]): T[] {
+  return arrays.reduce(
+    (concated, array) => [ ...concated, ...array ],
+    [] as T[]
+  )
+}
+
+function dedupe<T> (array: T[]): T[] {
+  return Array.from(new Set(array))
+}
+
+function isPrimitiveType (serializedType: TypeSchema) {
+  return Boolean(
+    Object.keys(serializedType).length === 1
+    && serializedType.type
+    && !Array.isArray(serializedType.type)
+    && primitiveTypes.indexOf(serializedType.type) > -1
+  )
+}
+
+function getPropertyTypes (propertiesArray: Array<ObjectProperties>, propertyName: string): TypeSchema[] {
+  const types: TypeSchema[] = []
+
+  for (const properties of propertiesArray) {
+    if (properties[propertyName]) {
+      types.push(properties[propertyName])
+    }
+  }
+
+  return types
+}
+
+function intersectProperties (propertiesArray: Array<ObjectProperties>): ObjectProperties {
+  const propertyNamesWithDuplicates = concat(propertiesArray.map(properties => Object.keys(properties)))
+  const propertyNames = dedupe(propertyNamesWithDuplicates)
+
+  const properties: ObjectProperties = {}
+
+  for (const propertyName of propertyNames) {
+    const propertyTypes = getPropertyTypes(propertiesArray, propertyName)
+    if (propertyTypes.length === 1) {
+      properties[propertyName] = propertyTypes[0]
+    } else {
+      throw new Error("Intersecting object properties is not yet supported.")
+    }
+  }
+
+  return properties
+}
+
+function serializeIntersection (type: ts.Type, serializeSymbol: any, serializeType: SerializeTypeFn): TypeSchema | null {
   if (type.flags & ts.TypeFlags.Intersection) {
     const intersectionTypes = (type as ts.UnionOrIntersectionType).types
+    const serializedTypes = intersectionTypes.map(intersectionType => serializeType(intersectionType))
+
+    if (!serializedTypes.every(intersectionType => intersectionType.type === IntrinsicType.object)) {
+      throw new Error("Intersection types are supported for intersections of object types only.")
+    }
+
+    const properties = intersectProperties(
+      serializedTypes.map(serializedType => serializedType.properties || {})
+    )
+
     return {
-      type: SerializedTypeIdentifier.union,
-      subtypes: intersectionTypes.map(intersectionType => serializeType(intersectionType))
+      type: IntrinsicType.object,
+      required: dedupe(concat(serializedTypes.map(serializedType => serializedType.required || []))),
+      properties
     }
   } else {
     return null
   }
 }
 
-function serializeUnion (type: ts.Type, serializeSymbol: any, serializeType: SerializeTypeFn): SerializedTypeBase | SerializedCombinedType | null {
+function serializeUnion (type: ts.Type, serializeSymbol: any, serializeType: SerializeTypeFn): UnionType | null {
   if (type.flags & ts.TypeFlags.Union) {
-    return destructureUnionWithUndefined((type as ts.UnionOrIntersectionType).types, serializeType)
-  } else {
-    return null
+    const unionTypes = (type as ts.UnionOrIntersectionType).types
+    const serializedUnionTypes = unionTypes.map(unionType => serializeType(unionType))
+
+    if (serializedUnionTypes.every(unionType => isPrimitiveType(unionType)))
+    return {
+      anyOf: serializedUnionTypes
+    }
   }
+  return null
 }
 
 export default [

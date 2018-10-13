@@ -1,60 +1,60 @@
 import ts from "typescript"
-import { SerializedTypeBase, SerializedTypeIdentifier } from "./_types"
+import { IntrinsicType, TypeSchema } from "./_types"
 
-function serializeAny (type: ts.Type): SerializedTypeBase | null {
+function serializeAny (type: ts.Type): TypeSchema | null {
   if (type.flags === ts.TypeFlags.Any) {
     return {
-      type: SerializedTypeIdentifier.any
+      type: IntrinsicType.any
     }
   } else {
     return null
   }
 }
 
-function serializeNever (type: ts.Type): SerializedTypeBase | null {
+function serializeNever (type: ts.Type): TypeSchema | null {
   if (type.flags === ts.TypeFlags.Never) {
     return {
-      type: SerializedTypeIdentifier.never
+      type: IntrinsicType.never
     }
   } else {
     return null
   }
 }
 
-function serializeNull (type: ts.Type): SerializedTypeBase | null {
+function serializeNull (type: ts.Type): TypeSchema | null {
   if (type.flags === ts.TypeFlags.Null) {
     return {
-      type: SerializedTypeIdentifier.null
+      type: IntrinsicType.null
     }
   } else {
     return null
   }
 }
 
-function serializeUndefined (type: ts.Type): SerializedTypeBase | null {
+function serializeUndefined (type: ts.Type): TypeSchema | null {
   if (type.flags === ts.TypeFlags.Undefined) {
     return {
-      type: SerializedTypeIdentifier.undefined
+      type: IntrinsicType.undefined
     }
   } else {
     return null
   }
 }
 
-function serializeUnknown (type: ts.Type): SerializedTypeBase | null {
+function serializeUnknown (type: ts.Type): TypeSchema | null {
   if (type.flags === ts.TypeFlags.Unknown) {
     return {
-      type: SerializedTypeIdentifier.unknown
+      type: IntrinsicType.unknown
     }
   } else {
     return null
   }
 }
 
-function serializeVoid (type: ts.Type): SerializedTypeBase | null {
+function serializeVoid (type: ts.Type): TypeSchema | null {
   if (type.flags & ts.TypeFlags.Void || type.flags & ts.TypeFlags.VoidLike) {
     return {
-      type: SerializedTypeIdentifier.void
+      type: IntrinsicType.void
     }
   } else {
     return null

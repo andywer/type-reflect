@@ -1,5 +1,5 @@
 import ts, { createArrayLiteral } from "typescript"
-import { SerializedTypeBase, SerializedTypeIdentifier } from "./serializers/_types"
+import { IntrinsicType, TypeSchema } from "./schema"
 import serializers from "./serializers/index"
 
 function createObjectLiteral (object: any): ts.ObjectLiteralExpression {
@@ -29,24 +29,21 @@ function createExpression (thing: any): ts.Expression {
   }
 }
 
-function serializeType (checker: ts.TypeChecker, type: ts.Type, node: ts.Node, typeName?: string): SerializedTypeBase {
+function serializeType (checker: ts.TypeChecker, type: ts.Type, node: ts.Node, typeName?: string): TypeSchema {
   const _serializeTypeBySymbolAt = (symbol: ts.Symbol) => serializeTypeBySymbolAt(checker, symbol, node)
   const _serializeType = (type: ts.Type) => serializeType(checker, type, node)
 
   for (const serializer of serializers) {
     const serialized = serializer(type, _serializeTypeBySymbolAt, _serializeType)
     if (serialized) {
-      return {
-        name: serialized.type === SerializedTypeIdentifier.builtin ? undefined : typeName,
-        ...serialized
-      }
+      return serialized
     }
   }
 
   console.log(`No serializer matched type flags: ${type.flags}. Falling back to "any".`)
   return {
-    type: SerializedTypeIdentifier.any,
-    name: typeName
+    type: IntrinsicType.any,
+    title: typeName
   }
 }
 

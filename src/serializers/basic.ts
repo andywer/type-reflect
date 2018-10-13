@@ -1,59 +1,45 @@
 import ts from "typescript"
-import {
-  SerializedTypeBase,
-  SerializedTypeWithValueBase,
-  SerializedTypeIdentifier
-} from "./_types"
+import { IntrinsicType, TypeSchema } from "./_types"
 
-function serializeBoolean (type: ts.Type): SerializedTypeBase | SerializedTypeWithValueBase | null {
+function serializeBoolean (type: ts.Type): TypeSchema | null {
   if (type.flags & ts.TypeFlags.BooleanLiteral) {
     return {
-      type: SerializedTypeIdentifier.boolean,
-      value: (type as ts.LiteralType).value
+      type: IntrinsicType.boolean,
+      enum: [ (type as any).intrinsicName === "true" ]
     }
   } else if (type.flags & ts.TypeFlags.Boolean || type.flags & ts.TypeFlags.BooleanLike) {
     return {
-      type: SerializedTypeIdentifier.boolean
+      type: IntrinsicType.boolean
     }
   } else {
     return null
   }
 }
 
-function serializeNumber (type: ts.Type): SerializedTypeBase | SerializedTypeWithValueBase | null {
+function serializeNumber (type: ts.Type): TypeSchema | null {
   if (type.flags & ts.TypeFlags.NumberLiteral) {
     return {
-      type: SerializedTypeIdentifier.number,
-      value: (type as ts.LiteralType).value
+      type: IntrinsicType.number,
+      enum: [ (type as ts.LiteralType).value ]
     }
   } else if (type.flags & ts.TypeFlags.Number || type.flags & ts.TypeFlags.NumberLike) {
     return {
-      type: SerializedTypeIdentifier.number
+      type: IntrinsicType.number
     }
   } else {
     return null
   }
 }
 
-function serializeString (type: ts.Type): SerializedTypeBase | SerializedTypeWithValueBase | null {
+function serializeString (type: ts.Type): TypeSchema | null {
   if (type.flags & ts.TypeFlags.StringLiteral) {
     return {
-      type: SerializedTypeIdentifier.string,
-      value: (type as ts.LiteralType).value
+      type: IntrinsicType.string,
+      enum: [ (type as ts.LiteralType).value ]
     }
   } else if (type.flags & ts.TypeFlags.String || type.flags & ts.TypeFlags.StringLike) {
     return {
-      type: SerializedTypeIdentifier.string
-    }
-  } else {
-    return null
-  }
-}
-
-function serializeSymbol (type: ts.Type): SerializedTypeBase | null {
-  if (type.flags & (ts.TypeFlags.ESSymbol | ts.TypeFlags.ESSymbolLike | ts.TypeFlags.UniqueESSymbol)) {
-    return {
-      type: SerializedTypeIdentifier.symbol
+      type: IntrinsicType.string
     }
   } else {
     return null
@@ -63,8 +49,7 @@ function serializeSymbol (type: ts.Type): SerializedTypeBase | null {
 const basicSerializers = [
   serializeBoolean,
   serializeNumber,
-  serializeString,
-  serializeSymbol
+  serializeString
 ]
 
 export default basicSerializers

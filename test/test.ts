@@ -1,16 +1,12 @@
 import Reflect from "ts-reflect"
 
-interface User {
+interface User<Logins> {
   id: 12
   name: string
   age?: number,
   created_at: Date,
-  logins: Date[]
+  logins: Logins
   someNumbers: [1,2]
 }
 
-interface PowerUser extends User {
-  admin: true
-}
-
-export const schema = Reflect<PowerUser>()
+export const schema = Reflect<User<Date[]>>()
