@@ -30,11 +30,11 @@ function createExpression (thing: any): ts.Expression {
 }
 
 function serializeType (checker: ts.TypeChecker, type: ts.Type, node: ts.Node, typeName?: string): TypeSchema {
-  const _serializeTypeBySymbolAt = (symbol: ts.Symbol) => serializeTypeBySymbolAt(checker, symbol, node)
   const _serializeType = (type: ts.Type) => serializeType(checker, type, node)
+  const _getTypeBySymbolAt = (symbol: ts.Symbol) => checker.getTypeOfSymbolAtLocation(symbol, node)
 
   for (const serializer of serializers) {
-    const serialized = serializer(type, _serializeTypeBySymbolAt, _serializeType)
+    const serialized = serializer(type, _serializeType, _getTypeBySymbolAt)
     if (serialized) {
       return serialized
     }
@@ -57,11 +57,6 @@ function getTypeName (type: ts.Type, node: ts.Node): string | null {
   } else {
     return null
   }
-}
-
-function serializeTypeBySymbolAt (checker: ts.TypeChecker, symbol: ts.Symbol, node: ts.Node) {
-  const type = checker.getTypeOfSymbolAtLocation(symbol, node)
-  return serializeType(checker, type, node)
 }
 
 export function serializeTypeNode (node: ts.TypeNode, checker: ts.TypeChecker): ts.Node {

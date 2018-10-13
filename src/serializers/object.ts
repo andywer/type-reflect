@@ -2,10 +2,10 @@ import ts from "typescript"
 import {
   ArrayType,
   BuiltinType,
+  GetTypeForSymbolAtFn,
   IntrinsicType,
   ObjectType,
   SerializeTypeFn,
-  SerializeTypeSymbolAtFn,
   TypeSchema
 } from "./_types"
 
@@ -60,12 +60,13 @@ function isPromiseSymbol (symbol: ts.Symbol) {
   return false
 }
 
-function serializeMembers (members: ts.UnderscoreEscapedMap<ts.Symbol>, serializeTypeSymbolAt: SerializeTypeSymbolAtFn): ObjectType["properties"] {
+function serializeMembers (members: ts.Symbol[], serializeType: SerializeTypeFn, getTypeForSymbolAt: GetTypeForSymbolAtFn): ObjectType["properties"] {
   const serialized: ObjectType["properties"] = {}
 
-  members.forEach((symbol, key) => {
-    serialized[key as string] = serializeTypeSymbolAt(symbol)
-  })
+  for (const symbol of members) {
+    const memberType = getTypeForSymbolAt(symbol)
+    serialized[symbol.getName()] = serializeType(memberType)
+  }
 
   return serialized
 }
@@ -110,7 +111,7 @@ function serializeBuiltin (type: ts.ObjectType, serializeType: SerializeTypeFn):
   return null
 }
 
-function serializeObjectType (type: ts.Type, serializeTypeSymbolAt: SerializeTypeSymbolAtFn, serializeType: SerializeTypeFn): TypeSchema | null {
+function serializeObjectType (type: ts.Type, serializeType: SerializeTypeFn, getTypeForSymbolAt: GetTypeForSymbolAtFn): TypeSchema | null {
   if (type.flags & ts.TypeFlags.Object) {
     const { objectFlags } = type as ts.ObjectType
     let inheritedTypes: ObjectType[] = []
@@ -122,7 +123,7 @@ function serializeObjectType (type: ts.Type, serializeTypeSymbolAt: SerializeTyp
     if (serializedTuple) return serializedTuple
 
     if ((objectFlags & ts.ObjectFlags.Reference) && (type as ts.TypeReference).target !== type) {
-      const serializedReference = serializeObjectType((type as ts.TypeReference).target, serializeTypeSymbolAt, serializeType)
+      const serializedReference = serializeObjectType((type as ts.TypeReference).target, serializeType, getTypeForSymbolAt)
       if (serializedReference) return serializedReference
     }
 
@@ -131,7 +132,7 @@ function serializeObjectType (type: ts.Type, serializeTypeSymbolAt: SerializeTyp
 
       if (baseTypes) {
         inheritedTypes = baseTypes
-          .map(baseType => serializeObjectType(baseType, serializeTypeSymbolAt, serializeType))
+          .map(baseType => serializeObjectType(baseType, serializeType, getTypeForSymbolAt))
           .filter(serializedBaseType => serializedBaseType && serializedBaseType.type === "object") as ObjectType[]
       }
     }
@@ -142,12 +143,13 @@ function serializeObjectType (type: ts.Type, serializeTypeSymbolAt: SerializeTyp
     )
 
     const symbol = type.getSymbol()
-    const members = symbol && symbol.members ? serializeMembers(symbol.members, serializeTypeSymbolAt) : {}
+    const members = serializeMembers((type as ts.ObjectType).getProperties(), serializeType, getTypeForSymbolAt)
 
     // TODO: For all properties: If it's a union of [*, undefined], normalize to * and strip from `required`
 
     return {
       type: IntrinsicType.object,
+      title: symbol ? symbol.getName() : undefined,
       properties: {
         ...inheritedMembers,
         ...members

@@ -65,7 +65,7 @@ function intersectProperties (propertiesArray: Array<ObjectProperties>): ObjectP
   return properties
 }
 
-function serializeIntersection (type: ts.Type, serializeSymbol: any, serializeType: SerializeTypeFn): TypeSchema | null {
+function serializeIntersection (type: ts.Type, serializeType: SerializeTypeFn): TypeSchema | null {
   if (type.flags & ts.TypeFlags.Intersection) {
     const intersectionTypes = (type as ts.UnionOrIntersectionType).types
     const serializedTypes = intersectionTypes.map(intersectionType => serializeType(intersectionType))
@@ -88,7 +88,7 @@ function serializeIntersection (type: ts.Type, serializeSymbol: any, serializeTy
   }
 }
 
-function serializeUnion (type: ts.Type, serializeSymbol: any, serializeType: SerializeTypeFn): UnionType | null {
+function serializeUnion (type: ts.Type, serializeType: SerializeTypeFn): UnionType | null {
   if (type.flags & ts.TypeFlags.Union) {
     const unionTypes = (type as ts.UnionOrIntersectionType).types
     const serializedUnionTypes = unionTypes.map(unionType => serializeType(unionType))

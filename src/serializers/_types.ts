@@ -5,6 +5,6 @@ export { ArrayType, BuiltinType, IntrinsicType, ObjectType, UnionType } from "..
 export { TypeSchema }
 
 export type SerializeTypeFn = (type: ts.Type) => TypeSchema
-export type SerializeTypeSymbolAtFn = (symbol: ts.Symbol) => TypeSchema
+export type GetTypeForSymbolAtFn = (symbol: ts.Symbol) => ts.Type
 
-export type Serializer = (type: ts.Type, serializeTypeSymbolAt: SerializeTypeSymbolAtFn, serializeType: SerializeTypeFn) => TypeSchema | null
+export type Serializer = (type: ts.Type, serializeType: SerializeTypeFn, getTypeForSymbolAt: GetTypeForSymbolAtFn) => TypeSchema | null
