@@ -11,11 +11,12 @@ function indent (size: number, message: string) {
   return message.split("\n").map(line => " ".repeat(size) + line).join("\n")
 }
 
-function createAnyOfValidator (validators: Validator[], context: ValidationContext): Validator {
+function createAnyOfValidator (validatorsWithSchema: Array<{ schema: TypeSchema<any>, validator: Validator }>): Validator {
   return (data: any, context: ValidationContext) => {
     const validationErrors: Error[] = []
-    for (const validator of validators) {
-      const result = validator(data, context)
+    for (const { validator, schema } of validatorsWithSchema) {
+      const subContext = { ...context, schema }
+      const result = validator(data, subContext)
       if (result === true) {
         return true
       } else {
@@ -31,11 +32,17 @@ function getValidator (schema: TypeSchema<any>, context: ValidationContext): Val
   if (schema.type && !Array.isArray(schema.type)) {
     return getValidatorByType(schema.type, context)
   } else if (schema.type && Array.isArray(schema.type)) {
-    const validators = schema.type.map(type => getValidatorByType(type, context))
-    return createAnyOfValidator(validators, context)
+    const validators = schema.type.map(type => ({
+      schema: { ...schema, type },
+      validator: getValidatorByType(type, context)
+    }))
+    return createAnyOfValidator(validators)
   } else if (schema.anyOf) {
-    const validators = schema.anyOf.map(subSchema => getValidator(subSchema, context))
-    return createAnyOfValidator(validators, context)
+    const validators = schema.anyOf.map(subSchema => ({
+      schema: subSchema,
+      validator: getValidator(subSchema, context)
+    }))
+    return createAnyOfValidator(validators)
   } else if (schema["$ref"]) {
     const validator = getRuntimeInstanceValidator(schema["$ref"])
     return validator || context.fail(`Cannot validate schema with $ref: ${schema["$ref"]}`)
