@@ -1,7 +1,7 @@
 import ts from "typescript"
 import { TypeSchema } from "../schema"
 
-export { ArrayType, BuiltinType, IntrinsicType, ObjectType, UnionType } from "../schema"
+export { ArrayType, BasicType, BuiltinType, IntrinsicType, ObjectType, UnionType } from "../schema"
 export { TypeSchema }
 
 export interface SerializationContext {

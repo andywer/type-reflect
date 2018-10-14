@@ -29,7 +29,7 @@ export enum IntrinsicType {
   void = "void",
 }
 
-interface BasicType {
+export interface BasicType {
   type: IntrinsicType | IntrinsicType[]
 }
 

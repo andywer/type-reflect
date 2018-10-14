@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { IntrinsicType, SerializationContext, TypeSchema, UnionType } from "./_types"
+import { BasicType, IntrinsicType, SerializationContext, TypeSchema, UnionType } from "./_types"
 
 interface ObjectProperties {
   [propName: string]: TypeSchema
@@ -28,10 +28,16 @@ function dedupe<T> (array: T[]): T[] {
 
 function isPrimitiveType (serializedType: TypeSchema) {
   return Boolean(
-    Object.keys(serializedType).length === 1
-    && serializedType.type
+    serializedType.type
     && !Array.isArray(serializedType.type)
     && primitiveTypes.indexOf(serializedType.type) > -1
+  )
+}
+
+function isTypeOnly (serializedType: TypeSchema) {
+  return Boolean(
+    Object.keys(serializedType).length === 1
+    && ("type" in serializedType)
   )
 }
 
@@ -88,14 +94,19 @@ function serializeIntersection (type: ts.Type, context: SerializationContext): T
   }
 }
 
-function serializeUnion (type: ts.Type, context: SerializationContext): UnionType | null {
+function serializeUnion (type: ts.Type, context: SerializationContext): UnionType | BasicType | null {
   // TODO: Aggregate union of same base types, all with enum values, to one schema type
 
   if (type.flags & ts.TypeFlags.Union) {
     const unionTypes = (type as ts.UnionOrIntersectionType).types
     const serializedUnionTypes = unionTypes.map(unionType => context.serializeType(unionType))
 
-    if (serializedUnionTypes.every(unionType => isPrimitiveType(unionType)))
+    if (serializedUnionTypes.every(unionType => isPrimitiveType(unionType) && isTypeOnly(unionType))) {
+      return {
+        type: serializedUnionTypes.map(unionType => unionType.type as IntrinsicType)
+      }
+    }
+
     return {
       anyOf: serializedUnionTypes
     }
