@@ -8,6 +8,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "outDir": "dist/",
+    "rootDir": "src/",
     "strict": true,
     "target": "es5",
     "declaration": true
@@ -15,6 +16,7 @@
   "include": [
     "src/index.ts",
     "src/transform.ts",
+    "src/validate.ts",
     "typings/**/*.d.ts",
     "node_modules/@*/types-*/*.d.ts"
   ]
