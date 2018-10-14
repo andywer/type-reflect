@@ -1,4 +1,8 @@
-import { TypeSchema } from "../schema"
+import { TypeSchema as GenericTypeSchema } from "../schema"
+
+// We don't care about the generic type argument during validation,
+// it's a high-level thing only
+type TypeSchema = GenericTypeSchema<any>
 
 export { TypeSchema }
 

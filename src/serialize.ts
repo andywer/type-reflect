@@ -41,7 +41,7 @@ function createContext (checker: ts.TypeChecker, node: ts.Node): SerializationCo
   }
 }
 
-function serializeType (checker: ts.TypeChecker, type: ts.Type, node: ts.Node, typeName?: string): TypeSchema {
+function serializeType (checker: ts.TypeChecker, type: ts.Type, node: ts.Node, typeName?: string): TypeSchema<any> {
   const context = createContext(checker, node)
 
   for (const serializer of serializers) {

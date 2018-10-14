@@ -5,14 +5,14 @@
  * Differences to the original JSON schema:
  *
  * - No sophisticated value validation props (TypeScript has no support for that)
- * - No `default`
+ * - Dropped several properties
  * - Additional `type` values to represent TypeScript types that don't exist in JSON
  *   - any
  *   - never
  *   - undefined
  *   - unknown
  *   - void
- * - type `builtin` to reflect things like
+ * - Using `"$ref": "runtime#<thing>"` to represent instances of Date, Promise, ...
  */
 
 export enum IntrinsicType {
@@ -35,9 +35,7 @@ export interface BasicType {
 
 export interface ArrayType {
   type: IntrinsicType.array,
-  items: TypeSchema | TypeSchema[],
-  maxItems?: number,
-  minItems?: number
+  items: TypeSchema<any> | TypeSchema<any>[]
 }
 
 export interface BuiltinType<BuiltinRef extends string> {
@@ -62,34 +60,34 @@ interface StringLiteralType<PossibleValues extends string[]> {
 export interface ObjectType {
   type: IntrinsicType.object,
   properties?: {
-    [propName: string]: TypeSchema
+    [propName: string]: TypeSchema<any>
   }
   required?: string[]
   title?: string
 }
 
 export interface UnionType {
-  anyOf: TypeSchema[]
+  anyOf: TypeSchema<any>[]
 }
 
-type AnyType = BasicType
-| ArrayType
-| BuiltinType<any>
-| ObjectType
-| BooleanLiteralType<any>
-| NumberLiteralType<any>
-| StringLiteralType<any>
-| UnionType
+export type AnyType = BasicType
+  | ArrayType
+  | BuiltinType<any>
+  | ObjectType
+  | BooleanLiteralType<any>
+  | NumberLiteralType<any>
+  | StringLiteralType<any>
+  | UnionType
 
-export type TypeSchema = AnyType & {
+export type TypeSchema<RepresentedType> = {
   type?: IntrinsicType | IntrinsicType[],
   "$ref"?: string,
-  anyOf?: TypeSchema[],
-  oneOf?: TypeSchema[],
+  anyOf?: TypeSchema<any>[],
+  oneOf?: TypeSchema<any>[],
   enum?: any[],
-  items?: TypeSchema | TypeSchema[],
+  items?: TypeSchema<any> | TypeSchema<any>[],
   properties?: {
-    [propName: string]: TypeSchema
+    [propName: string]: TypeSchema<any>
   },
   required?: string[],
   title?: string

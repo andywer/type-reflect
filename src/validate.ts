@@ -27,7 +27,7 @@ function createAnyOfValidator (validators: Validator[], context: ValidationConte
   }
 }
 
-function getValidator (schema: TypeSchema, context: ValidationContext): Validator {
+function getValidator (schema: TypeSchema<any>, context: ValidationContext): Validator {
   if (schema.type && !Array.isArray(schema.type)) {
     return getValidatorByType(schema.type, context)
   } else if (schema.type && Array.isArray(schema.type)) {
@@ -49,7 +49,7 @@ function validateData (data: any, context: ValidationContext): true | Error {
   return validator(data, context)
 }
 
-function createValidationContext (schema: TypeSchema, propertyPath: string): ValidationContext {
+function createValidationContext (schema: TypeSchema<any>, propertyPath: string): ValidationContext {
   const errorPrefix = propertyPath ? `${propertyPath}: ` : ""
   if (!propertyPath && schema.title) {
     propertyPath = schema.title
@@ -60,7 +60,7 @@ function createValidationContext (schema: TypeSchema, propertyPath: string): Val
     fail (errorMessage: string): never {
       throw new Error(errorPrefix + errorMessage)
     },
-    validate (subData: any, subSchema: TypeSchema, propertyPathAppend: string) {
+    validate (subData: any, subSchema: TypeSchema<any>, propertyPathAppend: string) {
       const delimiter = propertyPathAppend.charAt(0) === "[" ? "" : "."
       const subPropertyPath = propertyPath ? `${propertyPath}${delimiter}${propertyPathAppend}` : propertyPathAppend
       const subContext = createValidationContext(subSchema, subPropertyPath)
@@ -69,7 +69,7 @@ function createValidationContext (schema: TypeSchema, propertyPath: string): Val
   }
 }
 
-export function validate (data: any, schema: TypeSchema) {
+export function validate<ExpectedType> (data: any, schema: TypeSchema<ExpectedType>): data is ExpectedType {
   if (!schema) {
     throw new Error(`Expected a schema to use for validation. Got ${data}`)
   }
@@ -79,5 +79,19 @@ export function validate (data: any, schema: TypeSchema) {
 
   if (result !== true) {
     throw result
+  } else {
+    return true
+  }
+}
+
+export function parseJSON<ExpectedType> (jsonData: string, schema: TypeSchema<ExpectedType>): ExpectedType {
+  const parsed = JSON.parse(jsonData)
+
+  if (validate(parsed, schema)) {
+    return parsed
+  } else {
+    // Will never be run, but we need to check the return value of `validate()`
+    // to make the type guard work
+    throw new Error("The JSON data does not match the provided schema.")
   }
 }
