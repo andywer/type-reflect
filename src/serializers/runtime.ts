@@ -67,7 +67,9 @@ function serializeBuiltin (type: ts.Type, context: SerializationContext): ArrayT
       type: IntrinsicType.array,
       items: typeArguments && typeArguments.length === 1
         ? context.serializeType(typeArguments[0])
-        : { type: IntrinsicType.any }
+        : {
+          anyOf: (typeArguments || []).map(context.serializeType)
+        }
     }
   } else if (symbol && isDateSymbol(symbol)) {
     return {

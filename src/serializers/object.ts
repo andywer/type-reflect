@@ -27,7 +27,7 @@ function serializeTuple (type: ts.Type, context: SerializationContext): ArrayTyp
     const { objectFlags } = type as ts.ObjectType
 
     if (objectFlags & ts.ObjectFlags.Tuple) {
-      // TODO: Infer type of tuple elements
+      // FIXME: Set element types (`items` as array)
       return {
         type: IntrinsicType.array,
         items: {
