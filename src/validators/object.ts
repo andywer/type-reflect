@@ -15,7 +15,7 @@ export const objectValidatorsByType: ValidatorsByType = {
 
     for (const propName of Object.keys(context.schema.properties)) {
       if (!(propName in data)) {
-        return context.fail(`Property '${propName}' is missing.`)
+        return context.failOnProperty(propName, `Property is missing.`)
       } else {
         const propValidationResult = context.validate(data[propName], context.schema.properties[propName], propName)
         if (propValidationResult !== true) {

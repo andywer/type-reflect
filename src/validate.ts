@@ -49,21 +49,29 @@ function validateData (data: any, context: ValidationContext): true | Error {
   return validator(data, context)
 }
 
+function getSubPropertyPath (propertyPath: string, propertyPathAppend: string) {
+  const delimiter = propertyPathAppend.charAt(0) === "[" ? "" : "."
+  return propertyPath ? `${propertyPath}${delimiter}${propertyPathAppend}` : propertyPathAppend
+}
+
 function createValidationContext (schema: TypeSchema<any>, propertyPath: string): ValidationContext {
-  const errorPrefix = propertyPath ? `${propertyPath}: ` : ""
   if (!propertyPath && schema.title) {
     propertyPath = schema.title
   }
+
   return {
     propertyPath,
     schema,
     fail (errorMessage: string): never {
+      const errorPrefix = propertyPath ? `${propertyPath}: ` : ""
       throw new Error(errorPrefix + errorMessage)
     },
+    failOnProperty (propertyPathAppend: string, errorMessage: string): never {
+      const subPropertyPath = getSubPropertyPath(propertyPath, propertyPathAppend)
+      throw new Error(`${subPropertyPath}: ${errorMessage}`)
+    },
     validate (subData: any, subSchema: TypeSchema<any>, propertyPathAppend: string) {
-      const delimiter = propertyPathAppend.charAt(0) === "[" ? "" : "."
-      const subPropertyPath = propertyPath ? `${propertyPath}${delimiter}${propertyPathAppend}` : propertyPathAppend
-      const subContext = createValidationContext(subSchema, subPropertyPath)
+      const subContext = createValidationContext(subSchema, getSubPropertyPath(propertyPath, propertyPathAppend))
       return validateData(subData, subContext)
     }
   }

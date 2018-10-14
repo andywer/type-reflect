@@ -10,6 +10,7 @@ export interface ValidationContext {
   propertyPath: string
   schema: TypeSchema
   fail (message: string): never
+  failOnProperty (propertyPathAppend: string, message: string): never
   validate (subData: any, subSchema: TypeSchema, propertyPathAppend: string): true | Error
 }
 
