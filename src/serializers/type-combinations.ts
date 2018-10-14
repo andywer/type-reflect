@@ -64,7 +64,7 @@ function intersectProperties (propertiesArray: Array<ObjectProperties>): ObjectP
     if (propertyTypes.length === 1) {
       properties[propertyName] = propertyTypes[0]
     } else {
-      throw new Error("ts-reflect: Intersecting object properties is not yet supported.")
+      throw new Error("type-reflect: Intersecting object properties is not yet supported.")
     }
   }
 
@@ -77,7 +77,7 @@ function serializeIntersection (type: ts.Type, context: SerializationContext): T
     const serializedTypes = intersectionTypes.map(intersectionType => context.serializeType(intersectionType))
 
     if (!serializedTypes.every(intersectionType => intersectionType.type === IntrinsicType.object)) {
-      throw new Error("ts-reflect: Intersection types are supported for intersections of object types only.")
+      throw new Error("type-reflect: Intersection types are supported for intersections of object types only.")
     }
 
     const properties = intersectProperties(

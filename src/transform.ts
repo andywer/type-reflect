@@ -27,7 +27,7 @@ function stripQuotes (str: string) {
 }
 
 function isReflectImport (importDeclaration: ts.ImportDeclaration) {
-  return stripQuotes(importDeclaration.moduleSpecifier.getText()) === "ts-reflect"
+  return stripQuotes(importDeclaration.moduleSpecifier.getText()) === "type-reflect"
 }
 
 function reportError (node: ts.Node, messageText: string): DiagnosticWithLocation {
@@ -84,7 +84,7 @@ function reflect (options: {} = {}, program?: ts.Program): ts.TransformerFactory
         return ts.visitNode(sourceFile, createVisitor(context, program.getTypeChecker()))
       } else {
         throw new Error(
-          "Program instance not passed to ts-reflect transformation. Run it using 'ts': ts --transform ts-reflect"
+          "Program instance not passed to type-reflect transformation. Run it using 'ts': ts --transform type-reflect"
         )
       }
     }

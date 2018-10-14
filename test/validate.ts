@@ -1,5 +1,5 @@
-import Reflect from "ts-reflect"
-import { validate } from "ts-reflect/validate"
+import Reflect from "type-reflect"
+import { validate } from "type-reflect/validate"
 
 interface User {
   id: string | number,

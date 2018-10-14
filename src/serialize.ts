@@ -26,7 +26,7 @@ function createExpression (thing: any): ts.Expression {
   } else if (typeof thing === "object") {
     return createObjectLiteral(thing)
   } else {
-    throw new Error(`ts-reflect: Don't know how to turn a ${thing} into an AST expression.`)
+    throw new Error(`type-reflect: Don't know how to turn a ${thing} into an AST expression.`)
   }
 }
 

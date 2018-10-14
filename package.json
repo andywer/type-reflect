@@ -1,5 +1,5 @@
 {
-  "name": "ts-reflect",
+  "name": "type-reflect",
   "version": "0.1.0",
   "license": "MIT",
   "description": "TypeScript transformation to access type data on runtime.",

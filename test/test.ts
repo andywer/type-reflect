@@ -1,4 +1,4 @@
-import Reflect from "ts-reflect"
+import Reflect from "type-reflect"
 
 interface User<Logins> {
   id: 12

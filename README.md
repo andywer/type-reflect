@@ -1,4 +1,4 @@
-# ts-reflect
+# type-reflect
 
 TypeScript transformation and runtime that allows you to access TypeScript type information on runtime.
 
@@ -8,7 +8,7 @@ TypeScript transformation and runtime that allows you to access TypeScript type 
 ## Installation
 
 ```sh
-$ npm install ts-reflect
+$ npm install type-reflect
 ```
 
 
@@ -17,7 +17,7 @@ $ npm install ts-reflect
 Accessing type information in your code is easy:
 
 ```ts
-import Reflect from "ts-reflect"
+import Reflect from "type-reflect"
 
 interface User {
   id: string | number,
@@ -50,17 +50,17 @@ export const schema = Reflect<User>()
  */
 ```
 
-To transpile the TypeScript code using the `ts-reflect` transformation, use the [`ts` compiler](https://github.com/andywer/ts):
+To transpile the TypeScript code using the `type-reflect` transformation, use the [`ts` compiler](https://github.com/andywer/ts):
 
 ```sh
-$ ts --transform ts-reflect/transform ./source.ts
+$ ts --transform type-reflect/transform ./source.ts
 ```
 
 
 ## Validating data
 
 ```ts
-import { validate } from "ts-reflect/validate"
+import { validate } from "type-reflect/validate"
 import { getUser } from "./user"
 import { schema } from "./user-schema"
 
@@ -74,7 +74,7 @@ const user = validate(getUser(), schema)
 ## Validated JSON parsing
 
 ```ts
-import { parseJSON } from "ts-reflect/validate"
+import { parseJSON } from "type-reflect/validate"
 import { schema } from "./user-schema"
 
 const json = `{
