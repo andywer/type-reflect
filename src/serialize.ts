@@ -1,6 +1,7 @@
 import ts, { createArrayLiteral } from "typescript"
 import { IntrinsicType, TypeSchema } from "./schema"
 import serializers from "./serializers/index"
+import { SerializationContext } from "./serializers/_types"
 
 function createObjectLiteral (object: any): ts.ObjectLiteralExpression {
   const props = Object.keys(object)
@@ -29,12 +30,22 @@ function createExpression (thing: any): ts.Expression {
   }
 }
 
+function createContext (checker: ts.TypeChecker, node: ts.Node): SerializationContext {
+  return {
+    getTypeForSymbolAt (symbol: ts.Symbol) {
+      return checker.getTypeOfSymbolAtLocation(symbol, node)
+    },
+    serializeType (type: ts.Type) {
+      return serializeType(checker, type, node)
+    }
+  }
+}
+
 function serializeType (checker: ts.TypeChecker, type: ts.Type, node: ts.Node, typeName?: string): TypeSchema {
-  const _serializeType = (type: ts.Type) => serializeType(checker, type, node)
-  const _getTypeBySymbolAt = (symbol: ts.Symbol) => checker.getTypeOfSymbolAtLocation(symbol, node)
+  const context = createContext(checker, node)
 
   for (const serializer of serializers) {
-    const serialized = serializer(type, _serializeType, _getTypeBySymbolAt)
+    const serialized = serializer(type, context)
     if (serialized) {
       return serialized
     }

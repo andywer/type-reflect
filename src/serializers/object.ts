@@ -1,10 +1,9 @@
 import ts from "typescript"
 import {
   ArrayType,
-  GetTypeForSymbolAtFn,
   IntrinsicType,
   ObjectType,
-  SerializeTypeFn,
+  SerializationContext,
   TypeSchema
 } from "./_types"
 
@@ -12,22 +11,23 @@ function dedupe<T> (array: T[]): T[] {
   return Array.from(new Set(array))
 }
 
-function serializeMembers (members: ts.Symbol[], serializeType: SerializeTypeFn, getTypeForSymbolAt: GetTypeForSymbolAtFn): ObjectType["properties"] {
+function serializeMembers (members: ts.Symbol[], context: SerializationContext): ObjectType["properties"] {
   const serialized: ObjectType["properties"] = {}
 
   for (const symbol of members) {
-    const memberType = getTypeForSymbolAt(symbol)
-    serialized[symbol.getName()] = serializeType(memberType)
+    const memberType = context.getTypeForSymbolAt(symbol)
+    serialized[symbol.getName()] = context.serializeType(memberType)
   }
 
   return serialized
 }
 
-function serializeTuple (type: ts.Type): ArrayType | null {
+function serializeTuple (type: ts.Type, context: SerializationContext): ArrayType | null {
   if (type.flags & ts.TypeFlags.Object) {
     const { objectFlags } = type as ts.ObjectType
 
     if (objectFlags & ts.ObjectFlags.Tuple) {
+      // TODO: Infer type of tuple elements
       return {
         type: IntrinsicType.array,
         items: {
@@ -39,7 +39,7 @@ function serializeTuple (type: ts.Type): ArrayType | null {
   return null
 }
 
-function serializeReference (type: ts.Type, serializeType: SerializeTypeFn): TypeSchema | null {
+function serializeReference (type: ts.Type, context: SerializationContext): TypeSchema | null {
   if (!Boolean(type.flags & ts.TypeFlags.Object)) {
     return null
   }
@@ -47,12 +47,12 @@ function serializeReference (type: ts.Type, serializeType: SerializeTypeFn): Typ
   const { objectFlags } = type as ts.ObjectType
 
   if ((objectFlags & ts.ObjectFlags.Reference) && (type as ts.TypeReference).target !== type) {
-    return serializeType((type as ts.TypeReference).target)
+    return context.serializeType((type as ts.TypeReference).target)
   }
   return null
 }
 
-function serializeObjectType (type: ts.Type, serializeType: SerializeTypeFn, getTypeForSymbolAt: GetTypeForSymbolAtFn): TypeSchema | null {
+function serializeObjectType (type: ts.Type, context: SerializationContext): TypeSchema | null {
   if (type.flags & ts.TypeFlags.Object) {
     const { objectFlags } = type as ts.ObjectType
     let inheritedTypes: ObjectType[] = []
@@ -62,7 +62,7 @@ function serializeObjectType (type: ts.Type, serializeType: SerializeTypeFn, get
 
       if (baseTypes) {
         inheritedTypes = baseTypes
-          .map(baseType => serializeObjectType(baseType, serializeType, getTypeForSymbolAt))
+          .map(baseType => serializeObjectType(baseType, context))
           .filter(serializedBaseType => serializedBaseType && serializedBaseType.type === "object") as ObjectType[]
       }
     }
@@ -73,7 +73,7 @@ function serializeObjectType (type: ts.Type, serializeType: SerializeTypeFn, get
     )
 
     const symbol = type.getSymbol()
-    const members = serializeMembers((type as ts.ObjectType).getProperties(), serializeType, getTypeForSymbolAt)
+    const members = serializeMembers((type as ts.ObjectType).getProperties(), context)
 
     // TODO: For all properties: If it's a union of [*, undefined], normalize to * and strip from `required`
 

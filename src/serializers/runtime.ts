@@ -3,7 +3,7 @@ import {
   ArrayType,
   BuiltinType,
   IntrinsicType,
-  SerializeTypeFn
+  SerializationContext
 } from "./_types"
 
 function includesAll<T> (array: T[], expectedElements: T[]) {
@@ -53,7 +53,7 @@ function isPromiseSymbol (symbol: ts.Symbol) {
   return false
 }
 
-function serializeBuiltin (type: ts.Type, serializeType: SerializeTypeFn): ArrayType | BuiltinType<any> | null {
+function serializeBuiltin (type: ts.Type, context: SerializationContext): ArrayType | BuiltinType<any> | null {
   if (!Boolean(type.flags & ts.TypeFlags.Object)) {
     return null
   }
@@ -66,7 +66,7 @@ function serializeBuiltin (type: ts.Type, serializeType: SerializeTypeFn): Array
     return {
       type: IntrinsicType.array,
       items: typeArguments && typeArguments.length === 1
-        ? serializeType(typeArguments[0])
+        ? context.serializeType(typeArguments[0])
         : { type: IntrinsicType.any }
     }
   } else if (symbol && isDateSymbol(symbol)) {

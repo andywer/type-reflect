@@ -4,7 +4,9 @@ import { TypeSchema } from "../schema"
 export { ArrayType, BuiltinType, IntrinsicType, ObjectType, UnionType } from "../schema"
 export { TypeSchema }
 
-export type SerializeTypeFn = (type: ts.Type) => TypeSchema
-export type GetTypeForSymbolAtFn = (symbol: ts.Symbol) => ts.Type
+export interface SerializationContext {
+  serializeType(type: ts.Type): TypeSchema
+  getTypeForSymbolAt(symbol: ts.Symbol): ts.Type
+}
 
-export type Serializer = (type: ts.Type, serializeType: SerializeTypeFn, getTypeForSymbolAt: GetTypeForSymbolAtFn) => TypeSchema | null
+export type Serializer = (type: ts.Type, context: SerializationContext) => TypeSchema | null

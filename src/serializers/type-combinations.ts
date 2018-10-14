@@ -1,5 +1,5 @@
 import ts from "typescript"
-import { IntrinsicType, SerializeTypeFn, TypeSchema, UnionType } from "./_types"
+import { IntrinsicType, SerializationContext, TypeSchema, UnionType } from "./_types"
 
 interface ObjectProperties {
   [propName: string]: TypeSchema
@@ -65,10 +65,10 @@ function intersectProperties (propertiesArray: Array<ObjectProperties>): ObjectP
   return properties
 }
 
-function serializeIntersection (type: ts.Type, serializeType: SerializeTypeFn): TypeSchema | null {
+function serializeIntersection (type: ts.Type, context: SerializationContext): TypeSchema | null {
   if (type.flags & ts.TypeFlags.Intersection) {
     const intersectionTypes = (type as ts.UnionOrIntersectionType).types
-    const serializedTypes = intersectionTypes.map(intersectionType => serializeType(intersectionType))
+    const serializedTypes = intersectionTypes.map(intersectionType => context.serializeType(intersectionType))
 
     if (!serializedTypes.every(intersectionType => intersectionType.type === IntrinsicType.object)) {
       throw new Error("ts-reflect: Intersection types are supported for intersections of object types only.")
@@ -88,12 +88,12 @@ function serializeIntersection (type: ts.Type, serializeType: SerializeTypeFn): 
   }
 }
 
-function serializeUnion (type: ts.Type, serializeType: SerializeTypeFn): UnionType | null {
+function serializeUnion (type: ts.Type, context: SerializationContext): UnionType | null {
   // TODO: Aggregate union of same base types, all with enum values, to one schema type
 
   if (type.flags & ts.TypeFlags.Union) {
     const unionTypes = (type as ts.UnionOrIntersectionType).types
-    const serializedUnionTypes = unionTypes.map(unionType => serializeType(unionType))
+    const serializedUnionTypes = unionTypes.map(unionType => context.serializeType(unionType))
 
     if (serializedUnionTypes.every(unionType => isPrimitiveType(unionType)))
     return {
