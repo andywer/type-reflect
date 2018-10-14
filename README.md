@@ -89,6 +89,11 @@ const user = parseJSON(json, schema)
 // TypeScript can automatically infer that `user` is of type `User`
 ```
 
+## Known Limitations
+
+- Generic types / interfaces do not work correctly yet (generic type arguments don't work)
+- Tuples are casted to `any[]` right now
+
 
 ## License
 
