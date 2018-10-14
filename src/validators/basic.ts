@@ -1,5 +1,15 @@
 import { IntrinsicType } from "../schema"
-import { ValidatorsByType } from "./_types"
+import { ValidationContext, ValidatorsByType } from "./_types"
+
+function valueMismatch<T> (context: ValidationContext, actualValue: T, expectedValues: T[]) {
+  if (expectedValues.length === 1) {
+    const expected = JSON.stringify(expectedValues[0])
+    return context.fail(`Expected data to be: ${expected}. Got ${JSON.stringify(actualValue)}.`)
+  } else {
+    const expected = expectedValues.map((value) => JSON.stringify(value)).join(", ")
+    return context.fail(`Expected data to be one of: ${expected}. Got ${JSON.stringify(actualValue)}.`)
+  }
+}
 
 export const basicTypeValidatorsByType: ValidatorsByType = {
   [IntrinsicType.boolean]: (data, context) => {
@@ -7,7 +17,7 @@ export const basicTypeValidatorsByType: ValidatorsByType = {
       return context.fail(`Expected type boolean, got type ${typeof data}`)
     }
     if (context.schema.enum && context.schema.enum.indexOf(data) === -1) {
-      return context.fail(`Expected data to be one of: ${context.schema.enum.join(", ")}. Got ${data}`)
+      return valueMismatch(context, data, context.schema.enum)
     }
     return true
   },
@@ -17,7 +27,7 @@ export const basicTypeValidatorsByType: ValidatorsByType = {
       return context.fail(`Expected type number, got type ${typeof data}`)
     }
     if (context.schema.enum && context.schema.enum.indexOf(data) === -1) {
-      return context.fail(`Expected data to be one of: ${context.schema.enum.join(", ")}. Got ${data}`)
+      return valueMismatch(context, data, context.schema.enum)
     }
     return true
   },
@@ -27,8 +37,7 @@ export const basicTypeValidatorsByType: ValidatorsByType = {
       return context.fail(`Expected type string, got type ${typeof data}`)
     }
     if (context.schema.enum && context.schema.enum.indexOf(data) === -1) {
-      const expected = context.schema.enum.map((value: string) => `"${value}"`).join(", ")
-      return context.fail(`Expected data to be one of: ${expected}. Got ${data}`)
+      return valueMismatch(context, data, context.schema.enum)
     }
     return true
   }

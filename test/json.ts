@@ -11,7 +11,8 @@ export const schema = Reflect<User>()
 
 const data = `{
   "id": "foo",
-  "name": "Andy"
+  "name": "Andy",
+  "role": "foo"
 }`
 
 console.log(">", parseJSON(data, schema))
