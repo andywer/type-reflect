@@ -84,7 +84,7 @@ function createValidationContext (schema: TypeSchema<any>, propertyPath: string)
   }
 }
 
-export function validate<ExpectedType> (data: any, schema: TypeSchema<ExpectedType>): data is ExpectedType {
+export function validate<ExpectedType> (data: any, schema: TypeSchema<ExpectedType>): ExpectedType {
   if (!schema) {
     throw new Error(`Expected a schema to use for validation. Got ${data}`)
   }
@@ -95,18 +95,11 @@ export function validate<ExpectedType> (data: any, schema: TypeSchema<ExpectedTy
   if (result !== true) {
     throw result
   } else {
-    return true
+    return data
   }
 }
 
 export function parseJSON<ExpectedType> (jsonData: string, schema: TypeSchema<ExpectedType>): ExpectedType {
   const parsed = JSON.parse(jsonData)
-
-  if (validate(parsed, schema)) {
-    return parsed
-  } else {
-    // Will never be run, but we need to check the return value of `validate()`
-    // to make the type guard work
-    throw new Error("The JSON data does not match the provided schema.")
-  }
+  return validate(parsed, schema)
 }
