@@ -1,6 +1,6 @@
 # type-reflect
 
-TypeScript transformation and runtime that allows you to access TypeScript type information on runtime.
+TypeScript transformation plugin that provides access to TypeScript type information at runtime. Comes with a validation function and a type-checking `JSON.parse()`.
 
 ⚠️ Status: Experimental
 
@@ -28,9 +28,9 @@ interface User {
 export const schema = Reflect<User>()
 
 /*
-  `Reflect<User>()` will be transpiled to:
+  The `Reflect<>()` call will be transpiled to:
 
-  {
+  export const schema = {
     type: "object",
     title: "User",
     properties: {
@@ -49,6 +49,8 @@ export const schema = Reflect<User>()
   }
  */
 ```
+
+### Compilation
 
 To transpile the TypeScript code using the `type-reflect` transformation, use the [`ts` compiler](https://github.com/andywer/ts):
 
