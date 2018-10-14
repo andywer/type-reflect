@@ -1,14 +1,16 @@
 import { Serializer } from "./_types"
 import basicSerializers from "./basic"
-import typeCombinationSerializers from "./type-combinations"
 import invariantSerializers from "./invariants"
 import objectSerializers from "./object"
+import runtimeInstanceSerializers from "./runtime"
+import typeCombinationSerializers from "./type-combinations"
 
 const serializers: Serializer[] = [
-  ...basicSerializers,
-  ...invariantSerializers,
+  ...runtimeInstanceSerializers,
   ...objectSerializers,
-  ...typeCombinationSerializers
+  ...typeCombinationSerializers,
+  ...basicSerializers,
+  ...invariantSerializers
 ]
 
 export default serializers

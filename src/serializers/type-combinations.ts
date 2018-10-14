@@ -58,7 +58,7 @@ function intersectProperties (propertiesArray: Array<ObjectProperties>): ObjectP
     if (propertyTypes.length === 1) {
       properties[propertyName] = propertyTypes[0]
     } else {
-      throw new Error("Intersecting object properties is not yet supported.")
+      throw new Error("ts-reflect: Intersecting object properties is not yet supported.")
     }
   }
 
@@ -71,7 +71,7 @@ function serializeIntersection (type: ts.Type, serializeType: SerializeTypeFn): 
     const serializedTypes = intersectionTypes.map(intersectionType => serializeType(intersectionType))
 
     if (!serializedTypes.every(intersectionType => intersectionType.type === IntrinsicType.object)) {
-      throw new Error("Intersection types are supported for intersections of object types only.")
+      throw new Error("ts-reflect: Intersection types are supported for intersections of object types only.")
     }
 
     const properties = intersectProperties(
@@ -89,6 +89,8 @@ function serializeIntersection (type: ts.Type, serializeType: SerializeTypeFn): 
 }
 
 function serializeUnion (type: ts.Type, serializeType: SerializeTypeFn): UnionType | null {
+  // TODO: Aggregate union of same base types, all with enum values, to one schema type
+
   if (type.flags & ts.TypeFlags.Union) {
     const unionTypes = (type as ts.UnionOrIntersectionType).types
     const serializedUnionTypes = unionTypes.map(unionType => serializeType(unionType))
