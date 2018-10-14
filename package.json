@@ -1,6 +1,6 @@
 {
   "name": "ts-reflect",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "license": "MIT",
   "description": "TypeScript transformation to access type data on runtime.",
   "author": "Andy Wermke (https://github.com/andywer)",
