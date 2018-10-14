@@ -83,7 +83,9 @@ function reflect (options: {} = {}, program?: ts.Program): ts.TransformerFactory
       if (program) {
         return ts.visitNode(sourceFile, createVisitor(context, program.getTypeChecker()))
       } else {
-        return sourceFile
+        throw new Error(
+          "Program instance not passed to ts-reflect transformation. Run it using 'ts': ts --transform ts-reflect"
+        )
       }
     }
   }
