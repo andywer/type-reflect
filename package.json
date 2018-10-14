@@ -28,7 +28,9 @@
     "typescript": "^3.1.1"
   },
   "files": [
-    "dist/**"
+    "dist/**",
+    "*.d.ts",
+    "*.js"
   ],
   "prettier": {
     "semi": false,
