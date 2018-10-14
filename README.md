@@ -56,6 +56,21 @@ To transpile the TypeScript code using the `type-reflect` transformation, use th
 $ ts --transform type-reflect/transform ./source.ts
 ```
 
+To permanently use the transformation in your project, add this configuration to your `package.json`:
+
+```js
+{
+  // ...
+  "ts": {
+    "transforms": [
+      "type-reflect"
+    ]
+  }
+}
+```
+
+Note that you cannot use the standard `tsc`, since it does not expose the transformation API.
+
 
 ## Validating data
 
