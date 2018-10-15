@@ -22,43 +22,70 @@ Accessing type information in your code is easy:
 import Reflect from "type-reflect"
 
 interface User {
-  id: string | number,
   name: string,
   role: "admin" | "read-write" | "read-only"
 }
 
 export const schema = Reflect<User>()
-
-/*
-  The `Reflect<>()` call will be transpiled to:
-
-  export const schema = {
-    type: "object",
-    title: "User",
-    properties: {
-      id: {
-        type: ["string", "number"]
-      },
-      name: {
-        type: "string"
-      },
-      role: {
-        type: "string",
-        enum: ["admin", "read-write", "read-only"]
-      }
-    },
-    required: ["id", "name", "role"]
-  }
- */
 ```
 
-It works with all kinds of types:
+The `Reflect<>()` call above will be transpiled to:
+
+```ts
+export const schema = {
+  type: "object",
+  title: "User",
+  properties: {
+    name: {
+      type: "string"
+    },
+    role: {
+      type: "string",
+      enum: ["admin", "read-write", "read-only"]
+    }
+  },
+  required: ["id", "name", "role"]
+}
+```
+
+It works with all kinds of types, like strings, `any`, objects, arrays and much more:
 
 ```ts
 const ageSchema = Reflect<"new" | "old">()
 ```
 
-### Compilation
+### Validating data
+
+```ts
+import { validate } from "type-reflect/validate"
+import { getUser } from "./user"
+import { schema } from "./user-schema"
+
+const user = validate(getUser(), schema)
+
+// Throws if the return value of `getUser()` does not match the schema
+// TypeScript can automatically infer that `user` is of type `User`
+```
+
+### Validated JSON parsing
+
+```ts
+import { parseJSON } from "type-reflect/validate"
+import { schema } from "./user-schema"
+
+const json = `{
+  "name": "Me",
+  "role": "read-write"
+}`
+
+const user = parseJSON(json, schema)
+
+// Throws if the JSON data does not match the schema
+// TypeScript can automatically infer that `user` is of type `User`
+```
+
+
+## Compilation
 
 To transpile the TypeScript code using the `type-reflect` transformation, use the [`ts` compiler](https://github.com/andywer/ts):
 
@@ -81,38 +108,6 @@ To permanently use the transformation in your project, add this configuration to
 
 Note that you cannot use the standard `tsc`, since it does not expose the transformation API.
 
-
-## Validating data
-
-```ts
-import { validate } from "type-reflect/validate"
-import { getUser } from "./user"
-import { schema } from "./user-schema"
-
-const user = validate(getUser(), schema)
-
-// Will throw an error if the return value of `getUser()` does not match the schema
-// TypeScript can automatically infer that `user` is of type `User` after validation
-```
-
-
-## Validated JSON parsing
-
-```ts
-import { parseJSON } from "type-reflect/validate"
-import { schema } from "./user-schema"
-
-const json = `{
-  "id": 1,
-  "name": "Me",
-  "role": "read-write"
-}`
-
-const user = parseJSON(json, schema)
-
-// Will throw an error if the JSON data does not match the schema
-// TypeScript can automatically infer that `user` is of type `User`
-```
 
 ## Known Limitations
 
