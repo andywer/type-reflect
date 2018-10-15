@@ -2,6 +2,8 @@
 
 TypeScript transformation plugin that provides access to TypeScript type information at runtime. Comes with a validation function and a type-checking `JSON.parse()`.
 
+Use with TypeScript 3.
+
 ⚠️ Status: Experimental
 
 
@@ -48,6 +50,12 @@ export const schema = Reflect<User>()
     required: ["id", "name", "role"]
   }
  */
+```
+
+It works with all kinds of types:
+
+```ts
+const ageSchema = Reflect<"new" | "old">()
 ```
 
 ### Compilation
